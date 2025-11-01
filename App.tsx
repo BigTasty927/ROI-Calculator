@@ -42,6 +42,50 @@ const App: React.FC = () => {
     };
   }, [investment, returns]);
 
+  const downloadCSV = () => {
+    const csvRows: string[] = [];
+    
+    // Header row
+    csvRows.push('Category,Field,Value');
+    
+    // Investment Costs section
+    csvRows.push(`Investment Costs,Booth Design & Build,${investment.boothDesign}`);
+    csvRows.push(`Investment Costs,Show Services,${investment.showServices}`);
+    csvRows.push(`Investment Costs,Space Rental,${investment.spaceRental}`);
+    csvRows.push(`Investment Costs,Travel & Accommodation,${investment.travel}`);
+    csvRows.push(`Investment Costs,Staffing,${investment.staffing}`);
+    csvRows.push(`Investment Costs,Promotions & Giveaways,${investment.promotions}`);
+    csvRows.push(`Investment Costs,Pre-show Marketing,${investment.marketing}`);
+    csvRows.push(`Investment Costs,Total Investment,${calculatedMetrics.totalInvestment}`);
+    
+    // Returns section
+    csvRows.push(`Projected Returns,Leads Generated,${returns.leadsGenerated}`);
+    csvRows.push(`Projected Returns,Conversion Rate (%),${returns.conversionRate}`);
+    csvRows.push(`Projected Returns,Customer Lifetime Value (LTV),${returns.ltv}`);
+    
+    // Calculated Metrics section
+    csvRows.push(`Calculated Metrics,New Customers,${calculatedMetrics.newCustomers.toFixed(1)}`);
+    csvRows.push(`Calculated Metrics,Total Lead Value,${calculatedMetrics.totalLeadValue.toFixed(2)}`);
+    csvRows.push(`Calculated Metrics,Net Profit,${calculatedMetrics.netProfit.toFixed(2)}`);
+    csvRows.push(`Calculated Metrics,ROI (%),${calculatedMetrics.roi.toFixed(2)}`);
+    csvRows.push(`Calculated Metrics,Cost Per Lead,${calculatedMetrics.costPerLead.toFixed(2)}`);
+    
+    // Create CSV string
+    const csvContent = csvRows.join('\n');
+    
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `roi-calculator-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen bg-brand-dark font-sans text-brand-text">
       <Header />
@@ -56,7 +100,10 @@ const App: React.FC = () => {
             />
           </div>
           <div className="lg:w-1/2 mt-8 lg:mt-0">
-            <ResultsDisplay metrics={calculatedMetrics} />
+            <ResultsDisplay 
+              metrics={calculatedMetrics}
+              onDownloadCSV={downloadCSV}
+            />
           </div>
         </div>
       </main>

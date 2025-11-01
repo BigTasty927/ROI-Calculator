@@ -7,6 +7,7 @@ import TrendingUpIcon from './icons/TrendingUpIcon';
 
 interface ResultsDisplayProps {
   metrics: CalculatedMetrics;
+  onDownloadCSV: () => void;
 }
 
 const StatCard: React.FC<{ title: string; value: string; icon: React.ReactNode }> = ({ title, value, icon }) => (
@@ -21,7 +22,7 @@ const StatCard: React.FC<{ title: string; value: string; icon: React.ReactNode }
   </div>
 );
 
-const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ metrics }) => {
+const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ metrics, onDownloadCSV }) => {
   const { totalInvestment, totalLeadValue, netProfit, roi, newCustomers, costPerLead } = metrics;
 
   const chartData = [
@@ -32,9 +33,32 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ metrics }) => {
 
   return (
     <div className="bg-brand-medium p-6 rounded-lg shadow-xl sticky top-8">
-      <h2 className="text-2xl font-bold text-white border-b-2 border-brand-orange pb-2 mb-6">
-        Results
-      </h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-white border-b-2 border-brand-orange pb-2 flex-1">
+          Results
+        </h2>
+        <button
+          onClick={onDownloadCSV}
+          className="ml-4 px-4 py-2 bg-brand-orange hover:bg-orange-600 text-white font-medium rounded-lg transition-colors duration-200 flex items-center gap-2"
+          aria-label="Download CSV"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+          Download CSV
+        </button>
+      </div>
       
       <div className="text-center bg-brand-light rounded-lg p-6 mb-6">
         <p className="text-lg text-gray-300">Potential Return on Investment (ROI)</p>
