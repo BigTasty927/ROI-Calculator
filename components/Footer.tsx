@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
             rel="noopener noreferrer" 
             className="text-brand-orange hover:underline ml-1"
           >
-            Contact Sales at pamela@21stCEG.com
+            Contact Sales at https://21stceg.net/pamela-alexander
           </a>.
         </p>
       </div>
