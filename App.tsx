@@ -4,6 +4,9 @@ import Header from './components/Header';
 import CalculatorForm from './components/CalculatorForm';
 import ResultsDisplay from './components/ResultsDisplay';
 import Footer from './components/Footer';
+import ExhibitorInfoForm, { type ExhibitorInfo } from './components/ExhibitorInfoForm';
+import ConfigurationSection from './components/ConfigurationSection';
+import BenchmarkComparison, { type BenchmarkData } from './components/BenchmarkComparison';
 
 const App: React.FC = () => {
   const [investment, setInvestment] = useState<Investment>({
@@ -21,6 +24,49 @@ const App: React.FC = () => {
     conversionRate: 10,
     ltv: 5000,
   });
+
+  const [exhibitorInfo, setExhibitorInfo] = useState<ExhibitorInfo>({
+    name: '',
+    company: '',
+    email: '',
+    phone: '',
+  });
+
+  const [industry, setIndustry] = useState<string>('');
+
+  // Benchmark data matching ConfigurationSection
+  const benchmarkData: Record<string, { avgROI: string; avgConversionRate: string; avgLTV: string; avgCostPerLead: string }> = {
+    Technology: {
+      avgROI: "185%",
+      avgConversionRate: "12%",
+      avgLTV: "$8,500",
+      avgCostPerLead: "$125",
+    },
+    Healthcare: {
+      avgROI: "220%",
+      avgConversionRate: "15%",
+      avgLTV: "$12,000",
+      avgCostPerLead: "$200",
+    },
+    Retail: {
+      avgROI: "150%",
+      avgConversionRate: "8%",
+      avgLTV: "$3,500",
+      avgCostPerLead: "$75",
+    },
+    Finance: {
+      avgROI: "195%",
+      avgConversionRate: "11%",
+      avgLTV: "$15,000",
+      avgCostPerLead: "$250",
+    },
+    Education: {
+      avgROI: "165%",
+      avgConversionRate: "10%",
+      avgLTV: "$5,500",
+      avgCostPerLead: "$100",
+    },
+  };
 
   const calculatedMetrics = useMemo<CalculatedMetrics>(() => {
     // FIX: Explicitly convert `val` to a number. `Object.values` can be inferred as returning `unknown[]`,
@@ -41,6 +87,36 @@ const App: React.FC = () => {
       costPerLead,
     };
   }, [investment, returns]);
+
+  // Parse benchmark values and calculate comparison data
+  const benchmarkComparison = useMemo<BenchmarkData | null>(() => {
+    if (!industry || !benchmarkData[industry]) {
+      return null;
+    }
+
+    const benchmarks = benchmarkData[industry];
+    
+    // Parse ROI: "185%" -> 185
+    const roiBenchmark = parseFloat(benchmarks.avgROI.replace('%', ''));
+    
+    // Parse conversion rate: "12%" -> 12
+    const conversionRateBenchmark = parseFloat(benchmarks.avgConversionRate.replace('%', ''));
+    
+    // Calculate new customers benchmark using current leads generated and benchmark conversion rate
+    const newCustomersBenchmark = returns.leadsGenerated * (conversionRateBenchmark / 100);
+    
+    // Parse cost per lead: "$125" -> 125
+    const costPerLeadBenchmark = parseFloat(benchmarks.avgCostPerLead.replace(/[$,]/g, ''));
+
+    return {
+      roi: calculatedMetrics.roi,
+      roiBenchmark,
+      newCustomers: calculatedMetrics.newCustomers,
+      newCustomersBenchmark,
+      costPerLead: calculatedMetrics.costPerLead,
+      costPerLeadBenchmark,
+    };
+  }, [industry, returns.leadsGenerated, calculatedMetrics]);
 
   const downloadCSV = () => {
     const csvRows: string[] = [];
@@ -90,6 +166,14 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-brand-dark font-sans text-brand-text">
       <Header />
       <main className="container mx-auto px-4 py-8">
+        <ExhibitorInfoForm
+          data={exhibitorInfo}
+          onChange={setExhibitorInfo}
+        />
+        <ConfigurationSection
+          industry={industry}
+          onIndustryChange={setIndustry}
+        />
         <div className="flex flex-col lg:flex-row lg:space-x-8">
           <div className="lg:w-1/2">
             <CalculatorForm
@@ -104,6 +188,12 @@ const App: React.FC = () => {
               metrics={calculatedMetrics}
               onDownloadCSV={downloadCSV}
             />
+            {benchmarkComparison && (
+              <BenchmarkComparison
+                data={benchmarkComparison}
+                industry={industry}
+              />
+            )}
           </div>
         </div>
       </main>
